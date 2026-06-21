@@ -846,30 +846,7 @@ For a customer-facing portal: assign to the **Customer Community Plus** profile 
 
 ## 11. End-to-End Data Flow
 
-The complete booking journey in 15 steps:
-
-```
- 1. User enters type + date + party size → searchAvailability() SOQL
- 2. Resource cards rendered with available time slots
- 3. User selects a slot → createHold() → Booking_Hold__c (TTL 10 min)
- 4. 10-minute countdown starts in the UI
- 5. calculatePrice() runs the full pipeline → itemised breakdown shown
- 6. User enters/validates a promo code → validatePromoCode() (6 checks)
- 7. Total recalculates; loyalty points toggle shown if balance > 0
- 8. User enters Stripe card → tokenizeCard() → paymentMethodId
- 9. processPayment() called → Stripe /v1/payment_intents confirm callout
-10. INSERT Booking__c (Status = Confirmed, Reference = BK-XXXXXXXX)
-11. UPDATE Booking_Hold__c (Status = Released)
-12. UPDATE Promo_Code__c.Current_Uses__c + 1
-13. UPDATE Loyalty_Account__c.Points_Balance__c − loyaltyPts
-14. PUBLISH BookingEvent__e → Platform Event-Triggered Flow → Email + SMS
-15. bookingReference returned to LWC → Step 4 (Confirmation) renders
-```
-
-**Error paths:**
-- Hold expires (step 4 countdown → 0): `releaseHold()` called, user returned to step 1 with error toast
-- Stripe charge fails (step 9): `AuraHandledException` thrown, `stripeError` displayed, no `Booking__c` inserted
-- Invalid promo (step 6): server returns `reason` string, total unchanged, red error message shown
+<img width="4300" height="2800" alt="05-end-to-end-data-flow" src="https://github.com/user-attachments/assets/77d9bb80-46f9-4a86-aa81-9143f37a70b4" />
 
 ---
 
