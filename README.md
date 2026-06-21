@@ -307,6 +307,8 @@ Shows the success banner, reference card (with copy button), details grid, recei
 
 ## 6. Custom Object Map
 
+<img width="4300" height="2900" alt="06-custom-object-map" src="https://github.com/user-attachments/assets/a5f46499-0a46-4965-9bdc-1b941193bf1f" />
+
 ### Booking_Listing__c — Catalog
 
 | Field | Type | Notes |
@@ -427,67 +429,17 @@ Published by `EventBus.publish()` at the end of `processPayment()`. Consumed by 
 
 ### Overall architecture — four swimlanes
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ CLIENT (LWC)                                                                 │
-│                                                                               │
-│        ┌──────────────────── bookingCheckoutStepper ───────────────────┐    │
-│        │                                                                │    │
-│  resourceSelector   pricingPanel   paymentProcessor   bookingConfirmation    │
-└─────────────────────────────────────────────────────────────────────────────┘
-         │                │               │                    │
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ APEX                                                                          │
-│                                                                               │
-│  BookingEngineController   PricingController   PaymentController             │
-└─────────────────────────────────────────────────────────────────────────────┘
-         │                │               │                    │
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ DATA                                                                          │
-│                                                                               │
-│  Booking_Listing__c   Booking_Hold__c   Booking__c                           │
-│  Promo_Code__c        Loyalty_Account__c                Payment__c           │
-│                                                                               │
-│  ───── BookingEvent__e (Platform Event) → Notification Flow ─────           │
-└─────────────────────────────────────────────────────────────────────────────┘
-         │                                │
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ EXTERNAL                                                                      │
-│                                                                               │
-│  Stripe API    PayPal API    Google Calendar    iCal/Outlook    Custom Mdt   │
-│  (Named Cred)  (Named Cred)  (deep-link)        (blob download) (config)     │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+<img width="4300" height="2900" alt="01-overall-architecture" src="https://github.com/user-attachments/assets/ae05c54a-5b10-4da4-9446-a02c6480d4ec" />
+
 
 ### Pricing pipeline
 
-```
-Base Rate
-  └─ + Surge Amount         if recent_bookings_last_1h ≥ Surge_Threshold__c
-       └─ + Seasonal Amount  Listing.Seasonal_Rate__c %
-            └─ − Promo Disc  % or fixed (6 validation checks)
-                 └─ − Loyalty  loyaltyPts / 100 (capped at subtotal)
-                      └─ + Tax  Tax_Rate__c % on subtotal
-                           └─ = Total Due
-```
+<img width="4300" height="2800" alt="03-pricing-promotions" src="https://github.com/user-attachments/assets/0445770f-9714-4847-b6db-05aa9a37ccb0" />
+
 
 ### Payment flow
 
-```
-[Card]─────────────────────────────────────────────┐
-[PayPal]──────────────────────────────────────────→ processPayment()
-[Saved Method]────────────────────────────────────┘     │
-[Split]───────────────────────────────────────────┘     │
-                                                         ├─→ Stripe callout (Named Cred)
-                                                         ├─→ INSERT Booking__c
-                                                         ├─→ UPDATE Hold → Released
-                                                         ├─→ UPDATE Promo uses++
-                                                         ├─→ UPDATE Loyalty pts−
-                                                         └─→ PUBLISH BookingEvent__e
-                                                                    │
-                                                                    └─→ Notification Flow
-                                                                          (Email + SMS)
-```
+<img width="4300" height="2800" alt="04-payment-processing" src="https://github.com/user-attachments/assets/0c39068c-d657-4eea-849a-85bdd8105e5c" />
 
 ---
 
