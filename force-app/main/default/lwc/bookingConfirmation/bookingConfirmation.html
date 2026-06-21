@@ -1,0 +1,101 @@
+<template>
+  <div class="booking-confirmation">
+
+    <!-- Success Banner -->
+    <div class="success-banner">
+      <div class="success-icon-ring">
+        <lightning-icon icon-name="utility:check" size="large" class="success-icon"></lightning-icon>
+      </div>
+      <h1>Booking Confirmed!</h1>
+      <p>A confirmation has been sent to <strong>{customerEmail}</strong></p>
+    </div>
+
+    <!-- Reference Card -->
+    <div class="reference-card">
+      <div class="ref-label">Booking Reference</div>
+      <div class="ref-number">{bookingReference}</div>
+      <button class="copy-btn" onclick={copyReference}>
+        <lightning-icon icon-name="utility:copy" size="x-small"></lightning-icon>
+        {copyLabel}
+      </button>
+    </div>
+
+    <!-- Booking Details -->
+    <div class="details-grid">
+      <div class="detail-block">
+        <lightning-icon icon-name="utility:event" size="small"></lightning-icon>
+        <div>
+          <p class="detail-label">Resource</p>
+          <p class="detail-value">{confirmation.resourceName}</p>
+        </div>
+      </div>
+      <div class="detail-block">
+        <lightning-icon icon-name="utility:clock" size="small"></lightning-icon>
+        <div>
+          <p class="detail-label">Date &amp; Time</p>
+          <p class="detail-value">{confirmation.formattedDateTime}</p>
+        </div>
+      </div>
+      <div class="detail-block">
+        <lightning-icon icon-name="utility:groups" size="small"></lightning-icon>
+        <div>
+          <p class="detail-label">Party Size</p>
+          <p class="detail-value">{confirmation.partySize} guest(s)</p>
+        </div>
+      </div>
+      <div class="detail-block">
+        <lightning-icon icon-name="utility:money" size="small"></lightning-icon>
+        <div>
+          <p class="detail-label">Amount Paid</p>
+          <p class="detail-value">{confirmation.formattedTotal}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Receipt -->
+    <div class="receipt-section">
+      <h3>Payment Receipt</h3>
+      <div class="receipt-row"><span>Transaction ID</span><span>{confirmation.transactionId}</span></div>
+      <div class="receipt-row"><span>Payment Method</span><span>{confirmation.paymentMethodLabel}</span></div>
+      <div class="receipt-row"><span>Status</span>
+        <span class="badge-success">Paid</span>
+      </div>
+      <template if:true={confirmation.isSplit}>
+        <div class="receipt-row"><span>Split between</span><span>{confirmation.splitCount} payers</span></div>
+        <div class="receipt-row"><span>Your share</span><span>{confirmation.formattedSplitAmount}</span></div>
+      </template>
+    </div>
+
+    <!-- Calendar Add -->
+    <div class="calendar-section">
+      <h3>Add to Calendar</h3>
+      <div class="calendar-buttons">
+        <lightning-button
+          label="Google Calendar"
+          icon-name="utility:date_time"
+          variant="neutral"
+          onclick={addToGoogle}>
+        </lightning-button>
+        <lightning-button
+          label="Outlook / iCal"
+          icon-name="utility:date_time"
+          variant="neutral"
+          onclick={addToOutlook}>
+        </lightning-button>
+      </div>
+    </div>
+
+    <!-- Policy Notice -->
+    <div class="policy-notice">
+      <lightning-icon icon-name="utility:info" size="x-small"></lightning-icon>
+      <span>Free cancellation up to <strong>{confirmation.freeCancelByFormatted}</strong>. After that, a {confirmation.cancellationPenalty}% fee applies.</span>
+    </div>
+
+    <!-- Actions -->
+    <div class="action-row">
+      <lightning-button label="Download Invoice" variant="neutral" icon-name="utility:download" onclick={downloadInvoice}></lightning-button>
+      <lightning-button label="View My Bookings" variant="brand" onclick={goToMyBookings}></lightning-button>
+    </div>
+
+  </div>
+</template>

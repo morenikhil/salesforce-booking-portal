@@ -1,0 +1,20 @@
+# Salesforce
+.sfdx/
+.sf/
+*.dup
+package.xml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+*.swp
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Zip artifacts
+*.zip

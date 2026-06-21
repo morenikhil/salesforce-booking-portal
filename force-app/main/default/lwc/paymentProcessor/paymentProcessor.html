@@ -1,0 +1,179 @@
+<template>
+  <div class="payment-processor">
+    <h2 class="section-title">Payment</h2>
+
+    <div class="payment-layout">
+
+      <!-- Left: Order Summary -->
+      <div class="order-summary">
+        <h3>Order Summary</h3>
+        <div class="summary-line">
+          <span>{bookingDraft.resourceName}</span>
+          <span>{bookingDraft.pricing.formattedTotal}</span>
+        </div>
+        <template if:true={bookingDraft.pricing.hasDiscount}>
+          <div class="summary-line discount">
+            <span>Discount applied</span>
+            <span>-{bookingDraft.pricing.formattedDiscount}</span>
+          </div>
+        </template>
+        <div class="summary-line total-line">
+          <strong>Total due today</strong>
+          <strong>{bookingDraft.pricing.formattedTotal}</strong>
+        </div>
+
+        <!-- Split Payment Toggle -->
+        <div class="split-section">
+          <lightning-input
+            type="toggle"
+            label="Split payment between guests"
+            checked={splitEnabled}
+            onchange={handleSplitToggle}>
+          </lightning-input>
+          <template if:true={splitEnabled}>
+            <lightning-input
+              type="number"
+              label="Number of payers"
+              value={splitCount}
+              min="2"
+              max="10"
+              onchange={handleSplitCountChange}>
+            </lightning-input>
+            <p class="split-amount">Each pays: <strong>{splitAmountFormatted}</strong></p>
+          </template>
+        </div>
+      </div>
+
+      <!-- Right: Payment Method -->
+      <div class="payment-methods">
+        <h3>Payment Method</h3>
+
+        <!-- Method Selector -->
+        <div class="method-tabs">
+          <button class={cardTabCss} data-method="card" onclick={selectMethod}>
+            <lightning-icon icon-name="utility:credit_card" size="x-small"></lightning-icon>
+            Credit / Debit Card
+          </button>
+          <button class={paypalTabCss} data-method="paypal" onclick={selectMethod}>
+            <lightning-icon icon-name="utility:world" size="x-small"></lightning-icon>
+            PayPal
+          </button>
+          <button class={savedTabCss} data-method="saved" onclick={selectMethod}>
+            <lightning-icon icon-name="utility:lock" size="x-small"></lightning-icon>
+            Saved Methods
+          </button>
+        </div>
+
+        <!-- Credit / Debit Card Form (Stripe Elements placeholder) -->
+        <template if:true={isCardMethod}>
+          <div class="card-form">
+            <lightning-input
+              label="Cardholder Name"
+              value={cardName}
+              onchange={handleCardName}
+              placeholder="Name as it appears on card">
+            </lightning-input>
+            <!-- Stripe.js mounts here — the lwcId is passed to Stripe.elements() -->
+            <div class="stripe-element-wrapper">
+              <label class="stripe-label">Card Number</label>
+              <div lwc:ref="stripeCardNumber" class="stripe-element" id="stripe-card-number"></div>
+            </div>
+            <div class="card-row">
+              <div class="stripe-element-wrapper half">
+                <label class="stripe-label">Expiry</label>
+                <div lwc:ref="stripeCardExpiry" class="stripe-element" id="stripe-card-expiry"></div>
+              </div>
+              <div class="stripe-element-wrapper half">
+                <label class="stripe-label">CVC</label>
+                <div lwc:ref="stripeCardCvc" class="stripe-element" id="stripe-card-cvc"></div>
+              </div>
+            </div>
+            <template if:true={stripeError}>
+              <p class="stripe-error">{stripeError}</p>
+            </template>
+            <div class="security-note">
+              <lightning-icon icon-name="utility:lock" size="xx-small"></lightning-icon>
+              <span>Payments secured by Stripe. Card data never touches our servers.</span>
+            </div>
+          </div>
+        </template>
+
+        <!-- PayPal -->
+        <template if:true={isPaypalMethod}>
+          <div class="paypal-section">
+            <p>You'll be redirected to PayPal to complete payment securely.</p>
+            <div lwc:ref="paypalButton" class="paypal-button-container"></div>
+          </div>
+        </template>
+
+        <!-- Saved Payment Methods -->
+        <template if:true={isSavedMethod}>
+          <div class="saved-methods">
+            <template if:true={hasSavedMethods}>
+              <template for:each={savedMethods} for:item="method">
+                <div key={method.id}
+                  class={method.cssClass}
+                  data-id={method.id}
+                  onclick={selectSavedMethod}>
+                  <lightning-icon icon-name={method.icon} size="small"></lightning-icon>
+                  <div class="method-detail">
+                    <span class="method-name">{method.label}</span>
+                    <span class="method-sub">{method.sublabel}</span>
+                  </div>
+                  <template if:true={method.isSelected}>
+                    <lightning-icon icon-name="utility:check" size="x-small" class="check-icon"></lightning-icon>
+                  </template>
+                </div>
+              </template>
+            </template>
+            <template if:false={hasSavedMethods}>
+              <p class="no-saved">No saved payment methods. Use card or PayPal above.</p>
+            </template>
+          </div>
+        </template>
+
+        <!-- Billing Address -->
+        <div class="billing-section">
+          <lightning-input
+            type="toggle"
+            label="Billing address same as profile"
+            checked={sameAsProfile}
+            onchange={handleAddressToggle}>
+          </lightning-input>
+          <template if:false={sameAsProfile}>
+            <lightning-input label="Address Line 1" value={billingAddress.line1} data-field="line1" onchange={handleAddressChange}></lightning-input>
+            <lightning-input label="City" value={billingAddress.city} data-field="city" onchange={handleAddressChange}></lightning-input>
+            <lightning-input label="Postal Code" value={billingAddress.postalCode} data-field="postalCode" onchange={handleAddressChange}></lightning-input>
+            <lightning-combobox
+              label="Country"
+              value={billingAddress.country}
+              options={countryOptions}
+              onchange={handleCountryChange}>
+            </lightning-combobox>
+          </template>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Processing Overlay -->
+    <template if:true={isProcessing}>
+      <div class="processing-overlay">
+        <lightning-spinner alternative-text="Processing payment..." size="large"></lightning-spinner>
+        <p>Processing your payment securely…</p>
+      </div>
+    </template>
+
+    <!-- Action Buttons -->
+    <div class="action-row">
+      <lightning-button label="Back" variant="neutral" onclick={handleBack} disabled={isProcessing}></lightning-button>
+      <lightning-button
+        label={payButtonLabel}
+        variant="brand"
+        onclick={submitPayment}
+        disabled={isProcessing}>
+      </lightning-button>
+    </div>
+
+  </div>
+</template>

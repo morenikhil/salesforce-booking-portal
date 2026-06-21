@@ -1,0 +1,72 @@
+<template>
+  <div class="booking-stepper">
+
+    <!-- Progress Bar -->
+    <div class="stepper-header">
+      <template for:each={steps} for:item="step">
+        <div key={step.id} class={step.cssClass}>
+          <div class="step-circle">
+            <template if:true={step.done}>
+              <lightning-icon icon-name="utility:check" size="x-small" alternative-text="Done"></lightning-icon>
+            </template>
+            <template if:false={step.done}>
+              <span>{step.number}</span>
+            </template>
+          </div>
+          <span class="step-label">{step.label}</span>
+        </div>
+      </template>
+    </div>
+
+    <!-- Step 1: Resource Selection -->
+    <template if:true={isStep1}>
+      <c-resource-selector
+        onresourceselected={handleResourceSelected}
+        onholdcreated={handleHoldCreated}>
+      </c-resource-selector>
+    </template>
+
+    <!-- Step 2: Pricing & Promotions -->
+    <template if:true={isStep2}>
+      <c-pricing-panel
+        booking-draft={bookingDraft}
+        onpricingconfirmed={handlePricingConfirmed}
+        onback={goBack}>
+      </c-pricing-panel>
+    </template>
+
+    <!-- Step 3: Payment -->
+    <template if:true={isStep3}>
+      <c-payment-processor
+        booking-draft={bookingDraft}
+        onpaymentcomplete={handlePaymentComplete}
+        onback={goBack}>
+      </c-payment-processor>
+    </template>
+
+    <!-- Step 4: Confirmation -->
+    <template if:true={isStep4}>
+      <c-booking-confirmation
+        booking-reference={bookingReference}>
+      </c-booking-confirmation>
+    </template>
+
+    <!-- Hold Timer Banner -->
+    <template if:true={holdActive}>
+      <div class="hold-banner">
+        <lightning-icon icon-name="utility:clock" size="x-small"></lightning-icon>
+        <span>Your selection is held for <strong>{holdCountdown}</strong> — complete your booking before it expires.</span>
+      </div>
+    </template>
+
+    <!-- Error Toast -->
+    <template if:true={errorMessage}>
+      <div class="error-toast">
+        <lightning-icon icon-name="utility:error" size="x-small"></lightning-icon>
+        <span>{errorMessage}</span>
+        <button onclick={clearError}>&times;</button>
+      </div>
+    </template>
+
+  </div>
+</template>

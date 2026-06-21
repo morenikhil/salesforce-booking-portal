@@ -1,0 +1,122 @@
+.booking-stepper {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    font-family: 'Salesforce Sans', Arial, sans-serif;
+}
+
+/* ── Stepper header ── */
+.stepper-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.stepper-header::before {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: 15%;
+    right: 15%;
+    height: 2px;
+    background: #e0e5ee;
+    z-index: 0;
+}
+
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.step-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e0e5ee;
+    color: #6e6e73;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    transition: background 0.2s, color 0.2s;
+}
+
+.step-item.active .step-circle {
+    background: #0176d3;
+    color: #fff;
+}
+
+.step-item.done .step-circle {
+    background: #2e844a;
+    color: #fff;
+}
+
+.step-label {
+    font-size: 0.75rem;
+    color: #6e6e73;
+    font-weight: 500;
+}
+
+.step-item.active .step-label { color: #0176d3; font-weight: 700; }
+.step-item.done  .step-label  { color: #2e844a; }
+
+/* ── Hold countdown banner ── */
+.hold-banner {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1d1d1f;
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    z-index: 9999;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translateX(-50%) translateY(2rem); opacity: 0; }
+    to   { transform: translateX(-50%) translateY(0);    opacity: 1; }
+}
+
+/* ── Error toast ── */
+.error-toast {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background: #ba0517;
+    color: #fff;
+    padding: 0.875rem 1.25rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    z-index: 9999;
+    max-width: 400px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.error-toast button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.25rem;
+    cursor: pointer;
+    margin-left: auto;
+    padding: 0;
+    line-height: 1;
+}

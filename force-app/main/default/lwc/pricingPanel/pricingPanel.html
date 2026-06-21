@@ -1,0 +1,143 @@
+<template>
+  <div class="pricing-panel">
+    <h2 class="section-title">Pricing &amp; Promotions</h2>
+
+    <!-- Booking Summary Card -->
+    <div class="booking-summary-card">
+      <div class="summary-row">
+        <lightning-icon icon-name="utility:event" size="x-small"></lightning-icon>
+        <span>{bookingDraft.resourceName}</span>
+      </div>
+      <div class="summary-row">
+        <lightning-icon icon-name="utility:clock" size="x-small"></lightning-icon>
+        <span>{bookingDraft.formattedSlot}</span>
+      </div>
+      <div class="summary-row">
+        <lightning-icon icon-name="utility:groups" size="x-small"></lightning-icon>
+        <span>{bookingDraft.partySize} guest(s)</span>
+      </div>
+    </div>
+
+    <!-- Dynamic Pricing Breakdown -->
+    <div class="pricing-breakdown">
+      <h3>Price Breakdown</h3>
+
+      <div class="line-item">
+        <span>Base rate ({bookingDraft.duration} {bookingDraft.priceUnit})</span>
+        <span>{pricing.formattedBase}</span>
+      </div>
+
+      <template if:true={pricing.hasSurge}>
+        <div class="line-item surge">
+          <span>
+            <lightning-icon icon-name="utility:trending_up" size="xx-small"></lightning-icon>
+            Peak demand surcharge ({pricing.surgePercent}%)
+          </span>
+          <span>{pricing.formattedSurge}</span>
+        </div>
+      </template>
+
+      <template if:true={pricing.hasSeasonal}>
+        <div class="line-item seasonal">
+          <span>
+            <lightning-icon icon-name="utility:date_time" size="xx-small"></lightning-icon>
+            {pricing.seasonLabel}
+          </span>
+          <span>{pricing.formattedSeasonal}</span>
+        </div>
+      </template>
+
+      <template if:true={pricing.hasDiscount}>
+        <div class="line-item discount">
+          <span>
+            <lightning-icon icon-name="utility:discount" size="xx-small"></lightning-icon>
+            {pricing.discountLabel}
+          </span>
+          <span class="discount-amount">-{pricing.formattedDiscount}</span>
+        </div>
+      </template>
+
+      <div class="line-item tax">
+        <span>Taxes &amp; fees ({pricing.taxRate}%)</span>
+        <span>{pricing.formattedTax}</span>
+      </div>
+
+      <div class="line-item total">
+        <span>Total</span>
+        <span class="total-amount">{pricing.formattedTotal}</span>
+      </div>
+    </div>
+
+    <!-- Coupon / Promo Code -->
+    <div class="promo-section">
+      <h3>Promo Code</h3>
+      <div class="promo-input-row">
+        <lightning-input
+          label=""
+          placeholder="Enter promo code"
+          value={promoCode}
+          onchange={handlePromoInput}
+          disabled={promoApplied}>
+        </lightning-input>
+        <template if:false={promoApplied}>
+          <lightning-button
+            label="Apply"
+            variant="neutral"
+            onclick={applyPromo}
+            disabled={isApplyingPromo}>
+          </lightning-button>
+        </template>
+        <template if:true={promoApplied}>
+          <lightning-button
+            label="Remove"
+            variant="destructive-text"
+            onclick={removePromo}>
+          </lightning-button>
+        </template>
+      </div>
+      <template if:true={promoMessage}>
+        <p class={promoCssClass}>{promoMessage}</p>
+      </template>
+    </div>
+
+    <!-- Loyalty Points -->
+    <template if:true={hasLoyaltyPoints}>
+      <div class="loyalty-section">
+        <div class="loyalty-header">
+          <lightning-icon icon-name="utility:ribbon" size="x-small"></lightning-icon>
+          <h3>Loyalty Points</h3>
+          <span class="loyalty-balance">{loyaltyBalance} pts available</span>
+        </div>
+        <lightning-input
+          type="toggle"
+          label={loyaltyToggleLabel}
+          checked={useLoyaltyPoints}
+          onchange={handleLoyaltyToggle}>
+        </lightning-input>
+        <template if:true={useLoyaltyPoints}>
+          <p class="loyalty-savings">Saving {pricing.formattedLoyaltySavings} ({loyaltyPointsToUse} pts)</p>
+        </template>
+      </div>
+    </template>
+
+    <!-- Loading overlay while recalculating -->
+    <template if:true={isRecalculating}>
+      <div class="recalc-overlay">
+        <lightning-spinner size="small" alternative-text="Recalculating..."></lightning-spinner>
+        <span>Recalculating price…</span>
+      </div>
+    </template>
+
+    <!-- Action Buttons -->
+    <div class="action-row">
+      <lightning-button label="Back" variant="neutral" onclick={handleBack}></lightning-button>
+      <lightning-button
+        label="Continue to Payment"
+        variant="brand"
+        onclick={confirmPricing}
+        disabled={isRecalculating}>
+      </lightning-button>
+    </div>
+
+  </div>
+</template>

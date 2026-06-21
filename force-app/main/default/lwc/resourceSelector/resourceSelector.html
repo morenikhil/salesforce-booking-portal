@@ -1,0 +1,131 @@
+<template>
+  <div class="resource-selector">
+    <h2 class="section-title">Select Your Booking</h2>
+
+    <!-- Resource Type Tabs -->
+    <div class="tab-bar">
+      <template for:each={resourceTypes} for:item="rt">
+        <button key={rt.value}
+          class={rt.cssClass}
+          data-value={rt.value}
+          onclick={handleTypeChange}>
+          <lightning-icon icon-name={rt.icon} size="x-small"></lightning-icon>
+          {rt.label}
+        </button>
+      </template>
+    </div>
+
+    <!-- Date & Party Size Filters -->
+    <div class="filter-row">
+      <lightning-input
+        type="date"
+        label="Date"
+        value={selectedDate}
+        min={today}
+        onchange={handleDateChange}>
+      </lightning-input>
+      <lightning-input
+        type="number"
+        label="Guests / Seats"
+        value={partySize}
+        min="1"
+        max="50"
+        onchange={handlePartySizeChange}>
+      </lightning-input>
+      <lightning-input
+        type="time"
+        label="Preferred Time"
+        value={preferredTime}
+        onchange={handleTimeChange}>
+      </lightning-input>
+      <lightning-button
+        label="Search Availability"
+        variant="brand"
+        onclick={searchAvailability}
+        disabled={isSearching}>
+      </lightning-button>
+    </div>
+
+    <!-- Loading Spinner -->
+    <template if:true={isSearching}>
+      <div class="spinner-container">
+        <lightning-spinner alternative-text="Searching..." size="medium"></lightning-spinner>
+        <p>Checking real-time availability…</p>
+      </div>
+    </template>
+
+    <!-- Available Resources Grid -->
+    <template if:true={hasResults}>
+      <div class="results-grid">
+        <template for:each={availableResources} for:item="resource">
+          <div key={resource.id}
+            class={resource.cssClass}
+            data-id={resource.id}
+            onclick={handleResourceClick}>
+
+            <div class="resource-image">
+              <img src={resource.imageUrl} alt={resource.name} onerror={handleImageError} />
+              <span class={resource.badgeCss}>{resource.status}</span>
+            </div>
+
+            <div class="resource-info">
+              <h3>{resource.name}</h3>
+              <p class="resource-desc">{resource.description}</p>
+              <div class="resource-meta">
+                <span>
+                  <lightning-icon icon-name="utility:groups" size="xx-small"></lightning-icon>
+                  Up to {resource.capacity}
+                </span>
+                <span>
+                  <lightning-icon icon-name="utility:location" size="xx-small"></lightning-icon>
+                  {resource.location}
+                </span>
+              </div>
+              <div class="resource-price">
+                <span class="price-amount">{resource.formattedPrice}</span>
+                <span class="price-unit">/ {resource.priceUnit}</span>
+              </div>
+            </div>
+
+            <!-- Time Slot Picker (shown when this resource is active) -->
+            <template if:true={resource.isSelected}>
+              <div class="time-slot-picker">
+                <p class="slot-label">Available Time Slots</p>
+                <div class="slot-grid">
+                  <template for:each={resource.timeSlots} for:item="slot">
+                    <button key={slot.id}
+                      class={slot.cssClass}
+                      data-slot-id={slot.id}
+                      data-resource-id={resource.id}
+                      onclick={handleSlotSelect}
+                      disabled={slot.unavailable}>
+                      {slot.label}
+                    </button>
+                  </template>
+                </div>
+                <lightning-button
+                  label="Confirm Selection"
+                  variant="brand"
+                  onclick={confirmSelection}
+                  disabled={!selectedSlotId}
+                  class="confirm-btn">
+                </lightning-button>
+              </div>
+            </template>
+
+          </div>
+        </template>
+      </div>
+    </template>
+
+    <!-- No Results -->
+    <template if:true={noResults}>
+      <div class="empty-state">
+        <lightning-icon icon-name="utility:search" size="large"></lightning-icon>
+        <h3>No availability found</h3>
+        <p>Try a different date, time, or party size.</p>
+      </div>
+    </template>
+
+  </div>
+</template>
