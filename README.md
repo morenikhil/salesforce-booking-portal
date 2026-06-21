@@ -983,10 +983,4 @@ Before switching from sandbox to production:
 
 ---
 
-## License
-
-MIT — free to use and modify for commercial and personal projects.
-
----
-
 *Built for Salesforce Developer Org · API v61.0 · Summer '24*
